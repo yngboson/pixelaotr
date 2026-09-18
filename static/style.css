@@ -1,4 +1,4 @@
-/* 기본 HTML 스타일 (AI 디자인 전면 배제) */
+/* Standard HTML Form Styling */
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -120,7 +120,7 @@ progress {
     font-family: Consolas, "Courier New", monospace;
 }
 
-/* 단일 메인 뷰포트 레이아웃 */
+/* Main Canvas Viewport Layout */
 .main-viewport-container {
     margin-top: 14px;
 }

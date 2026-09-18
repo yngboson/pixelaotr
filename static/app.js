@@ -82,20 +82,20 @@ let mainData32 = null;
 // Handle file input changes
 sourceInput.addEventListener('change', () => {
     if (sourceInput.files && sourceInput.files[0]) {
-        sourceFileHint.textContent = `선택된 파일: ${sourceInput.files[0].name} (${(sourceInput.files[0].size / 1024).toFixed(1)} KB)`;
+        sourceFileHint.textContent = `Selected: ${sourceInput.files[0].name} (${(sourceInput.files[0].size / 1024).toFixed(1)} KB)`;
         sourceFileHint.style.color = '#008800';
     } else {
-        sourceFileHint.textContent = '기본 소스: 10047C68-3563-44F7-9125-63DE531F3A86.png (햄스터 V)';
+        sourceFileHint.textContent = 'Default Source: 10047C68-3563-44F7-9125-63DE531F3A86.png (Hamster V)';
         sourceFileHint.style.color = '#0055aa';
     }
 });
 
 targetInput.addEventListener('change', () => {
     if (targetInput.files && targetInput.files[0]) {
-        targetFileHint.textContent = `선택된 파일: ${targetInput.files[0].name} (${(targetInput.files[0].size / 1024).toFixed(1)} KB)`;
+        targetFileHint.textContent = `Selected: ${targetInput.files[0].name} (${(targetInput.files[0].size / 1024).toFixed(1)} KB)`;
         targetFileHint.style.color = '#008800';
     } else {
-        targetFileHint.textContent = '기본 목표: Site-background-dark.webp';
+        targetFileHint.textContent = 'Default Target: Site-background-dark.webp';
         targetFileHint.style.color = '#0055aa';
     }
 });
@@ -109,7 +109,7 @@ btnResetDefault.addEventListener('click', () => {
 // Preload default project images (10047C68-3563-44F7-9125-63DE531F3A86.png & Site-background-dark.webp)
 async function loadDefaultProjectImages() {
     try {
-        logStatus('기본 프로젝트 사진 로드 중...');
+        logStatus('Loading default project images...');
         const [resSrc, resTgt] = await Promise.all([
             fetch('default_source.png'),
             fetch('default_target.webp')
@@ -138,18 +138,18 @@ async function loadDefaultProjectImages() {
         statTotalSwaps.textContent = '0';
         statSortedPixels.textContent = `0 / ${(imgWidth * imgHeight).toLocaleString()} (0.00%)`;
         statCurrentAlgo.textContent = sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text;
-        statSimState.textContent = '기본 사진 대기 중';
-        mainMeta.textContent = `해상도: ${imgWidth}x${imgHeight} | 기본 사진 준비 완료 (햄스터 V)`;
+        statSimState.textContent = 'Default image ready';
+        mainMeta.textContent = `Resolution: ${imgWidth}x${imgHeight} | Default image ready (Hamster V)`;
 
-        sourceFileHint.textContent = `기본 소스: 10047C68-3563-44F7-9125-63DE531F3A86.png (${imgWidth}x${imgHeight})`;
+        sourceFileHint.textContent = `Default Source: 10047C68-3563-44F7-9125-63DE531F3A86.png (${imgWidth}x${imgHeight})`;
         sourceFileHint.style.color = '#0055aa';
-        targetFileHint.textContent = `기본 목표: Site-background-dark.webp`;
+        targetFileHint.textContent = `Default Target: Site-background-dark.webp`;
         targetFileHint.style.color = '#0055aa';
 
-        logStatus(`기본 사진 준비 완료 (${imgWidth}x${imgHeight}, ${(imgWidth * imgHeight).toLocaleString()} 픽셀). 최적화 모드를 고른 뒤 [이미지 불러오기 및 중간 이미지 최적화 계산]을 누르세요.`);
+        logStatus(`Default image ready (${imgWidth}x${imgHeight}, ${(imgWidth * imgHeight).toLocaleString()} px). Select an optimization mode and click [Prepare & Optimize Intermediate Mapping].`);
     } catch (err) {
-        console.warn('기본 이미지 로드 실패:', err);
-        logStatus('기본 이미지 자동 로드 대기 중. 직접 사진 파일을 선택할 수 있습니다.');
+        console.warn('Failed to load default images:', err);
+        logStatus('Default image auto-load waiting. You can also select custom images.');
     }
 }
 
@@ -186,18 +186,18 @@ function updateMinStepModeUI() {
         modeManual.disabled = true;
         manualMinStepSlider.disabled = true;
         manualSliderRow.style.opacity = '0.4';
-        manualMinStepValue.textContent = '자동 극소값 수렴 (설정 불필요)';
+        manualMinStepValue.textContent = 'Auto Local-Minimum (No setup needed)';
     } else {
         modeAuto.disabled = false;
         modeManual.disabled = false;
         if (modeManual.checked) {
             manualMinStepSlider.disabled = false;
             manualSliderRow.style.opacity = '1.0';
-            manualMinStepValue.textContent = `${parseInt(manualMinStepSlider.value, 10).toLocaleString()} 스텝`;
+            manualMinStepValue.textContent = `${parseInt(manualMinStepSlider.value, 10).toLocaleString()} steps`;
         } else {
             manualMinStepSlider.disabled = true;
             manualSliderRow.style.opacity = '0.5';
-            manualMinStepValue.textContent = `${parseInt(manualMinStepSlider.value, 10).toLocaleString()} 스텝 (자동 계산 기준치)`;
+            manualMinStepValue.textContent = `${parseInt(manualMinStepSlider.value, 10).toLocaleString()} steps (Auto target)`;
         }
     }
 }
@@ -210,7 +210,7 @@ if (optMode5D && optMode3D) {
 modeAuto.addEventListener('change', updateMinStepModeUI);
 modeManual.addEventListener('change', updateMinStepModeUI);
 manualMinStepSlider.addEventListener('input', () => {
-    manualMinStepValue.textContent = `${parseInt(manualMinStepSlider.value, 10).toLocaleString()} 스텝`;
+    manualMinStepValue.textContent = `${parseInt(manualMinStepSlider.value, 10).toLocaleString()} steps`;
 });
 updateMinStepModeUI();
 
@@ -224,7 +224,7 @@ function getBatchSizeFromSlider(val) {
 
 function updateSpeedLabel() {
     const batch = getBatchSizeFromSlider(parseInt(speedSlider.value, 10));
-    speedValue.textContent = `${batch.toLocaleString()}회/프레임`;
+    speedValue.textContent = `${batch.toLocaleString()} / frame`;
 }
 
 function updateDelayLabel() {
@@ -238,7 +238,7 @@ updateDelayLabel();
 updateAdaptiveSpeedUI();
 
 function logStatus(msg) {
-    statusBar.textContent = `[상태] ${msg}`;
+    statusBar.textContent = `[Status] ${msg}`;
     console.log(`[Pixelator] ${msg}`);
 }
 
@@ -333,8 +333,8 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
     statTotalSwaps.textContent = '0';
     statSortedPixels.textContent = '0 / ' + (imgWidth * imgHeight).toLocaleString();
     statCurrentAlgo.textContent = sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text;
-    statSimState.textContent = '중간 이미지 최적화 중...';
-    mainMeta.textContent = `해상도: ${imgWidth}x${imgHeight} | 원본 소스 이미지 대기 중`;
+    statSimState.textContent = 'Optimizing intermediate image...';
+    mainMeta.textContent = `Resolution: ${imgWidth}x${imgHeight} | Original source image waiting`;
 
     // Initialize Hill Climbing Optimizer
     const isAuto = modeAuto.checked;
@@ -346,10 +346,10 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
 
     // Show Progress UI
     optimizerProgressContainer.style.display = 'block';
-    optStatusTitle.textContent = `내부 중간 이미지 생성 중 (${isAuto ? '자동 최소 스텝: ' + optimizer.minSteps.toLocaleString() : '수동 최소 스텝: ' + manualSteps.toLocaleString()})`;
+    optStatusTitle.textContent = `Generating intermediate image (${isAuto ? 'Auto min steps: ' + optimizer.minSteps.toLocaleString() : 'Manual min steps: ' + manualSteps.toLocaleString()})`;
     optProgressBar.value = 0;
     optPercentText.textContent = '0%';
-    optDetailText.textContent = `시작 준비 중... 초기 오차: ${optimizer.initialDistance.toFixed(2)}`;
+    optDetailText.textContent = `Preparing... Initial error: ${optimizer.initialDistance.toFixed(2)}`;
 
     btnPrepare.disabled = true;
     btnLoadSample.disabled = true;
@@ -359,7 +359,7 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
     btnDownload.disabled = true;
 
     isOptimizing = true;
-    logStatus(`1단계: 힐 클라이밍 최적화 시작 (최소 스텝: ${optimizer.minSteps.toLocaleString()})...`);
+    logStatus(`Phase 1: Starting optimization (min steps: ${optimizer.minSteps.toLocaleString()})...`);
 
     // Async chunk loop for hill climbing
     const chunkSize = 40000;
@@ -374,21 +374,21 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
         optProgressBar.value = percent;
 
         if (optimizer.stepsDone < optimizer.minSteps) {
-            optPercentText.textContent = `${percent}% (최소 스텝 확보 중)`;
+            optPercentText.textContent = `${percent}% (Ensuring min steps)`;
         } else {
-            optPercentText.textContent = `100% (수렴 대기 중)`;
+            optPercentText.textContent = `100% (Converging)`;
         }
 
-        optDetailText.textContent = `스텝: ${optimizer.stepsDone.toLocaleString()} / ${optimizer.minSteps.toLocaleString()} | 스왑: ${optimizer.totalSwaps.toLocaleString()} | 오차: ${optimizer.currentDistance.toFixed(2)}`;
+        optDetailText.textContent = `Steps: ${optimizer.stepsDone.toLocaleString()} / ${optimizer.minSteps.toLocaleString()} | Swaps: ${optimizer.totalSwaps.toLocaleString()} | Error: ${optimizer.currentDistance.toFixed(2)}`;
 
         if (isDone) {
             // Optimization finished
             isOptimizing = false;
             destinationMap = optimizer.getDestinationMap();
 
-            optStatusTitle.textContent = `중간 이미지 생성 완료! (최종 오차: ${optimizer.currentDistance.toFixed(2)})`;
+            optStatusTitle.textContent = `Intermediate image complete! (Final error: ${optimizer.currentDistance.toFixed(2)})`;
             optProgressBar.value = 100;
-            optPercentText.textContent = '100% 완료';
+            optPercentText.textContent = '100% Complete';
 
             initSortingEngine();
 
@@ -399,8 +399,8 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
             btnReset.disabled = false;
             btnDownload.disabled = false;
 
-            statSimState.textContent = '정렬 준비 완료';
-            logStatus(`중간 이미지 생성 완료! 이제 정렬 알고리즘을 선택하고 [정렬 시작]을 누르세요.`);
+            statSimState.textContent = 'Ready to sort';
+            logStatus(`Intermediate image complete! Select an algorithm and click [Start Sorting].`);
         } else {
             // Schedule next chunk
             setTimeout(optimizationLoop, 0);
@@ -416,7 +416,7 @@ btnPrepare.addEventListener('click', async () => {
     const tgtFile = (targetInput.files && targetInput.files[0]) ? targetInput.files[0] : defaultTargetFile;
 
     if (!srcFile || !tgtFile) {
-        alert('소스 사진과 목표 사진을 선택하거나 기본 사진이 로드될 때까지 기다려 주세요.');
+        alert('Please select source and target images, or wait for default images to load.');
         return;
     }
 
@@ -424,13 +424,13 @@ btnPrepare.addEventListener('click', async () => {
     const isAuto = modeAuto.checked;
     const minSteps = parseInt(manualMinStepSlider.value, 10);
     const optMode = (optMode3D && optMode3D.checked) ? '3d_rgb_vector' : '5d_sliced';
-    const optModeName = optMode === '3d_rgb_vector' ? '3D RGB 벡터 공간 매칭' : '5D 시공간 매칭';
+    const optModeName = optMode === '3d_rgb_vector' ? '3D RGB Vector Matching' : '5D Spatiotemporal Transport';
 
     optimizerProgressContainer.style.display = 'block';
-    optStatusTitle.textContent = `RTX 3080 Ti CUDA GPU 가속 [${optModeName}] 연산 중...`;
+    optStatusTitle.textContent = `RTX 3080 Ti CUDA GPU [${optModeName}] computing...`;
     optProgressBar.value = 30;
-    optPercentText.textContent = 'GPU 연산 중...';
-    optDetailText.textContent = `서버 GPU(PyTorch CUDA)로 초고속 [${optModeName}] 연산을 수행하고 있습니다.`;
+    optPercentText.textContent = 'GPU computing...';
+    optDetailText.textContent = `Performing ultrafast [${optModeName}] optimization via PyTorch CUDA.`;
 
     btnPrepare.disabled = true;
     btnResetDefault.disabled = true;
@@ -440,7 +440,7 @@ btnPrepare.addEventListener('click', async () => {
     btnReset.disabled = true;
     btnDownload.disabled = true;
 
-    logStatus(`서버로 이미지 전송 및 RTX 3080 Ti CUDA GPU 가속 [${optModeName}] 최적화 시작...`);
+    logStatus(`Uploading images to server; starting RTX 3080 Ti CUDA GPU [${optModeName}] optimization...`);
 
     const formData = new FormData();
     formData.append('source', srcFile);
@@ -474,16 +474,16 @@ btnPrepare.addEventListener('click', async () => {
             destinationMap = new Int32Array(data.destination_map);
 
             optProgressBar.value = 100;
-            optPercentText.textContent = '100% 완료 (GPU 가속)';
-            optStatusTitle.textContent = data.stats.message || `GPU 가속 [${optModeName}] 중간 이미지 생성 완료!`;
-            optDetailText.textContent = `모드: ${optModeName} | 해상도: ${imgWidth}x${imgHeight} | 소요시간: ${data.stats.elapsed_seconds}초 | 디바이스: ${data.stats.device_name}`;
+            optPercentText.textContent = '100% Complete (GPU accelerated)';
+            optStatusTitle.textContent = data.stats.message || `GPU accelerated [${optModeName}] Intermediate image complete!`;
+            optDetailText.textContent = `Mode: ${optModeName} | Res: ${imgWidth}x${imgHeight} | Elapsed: ${data.stats.elapsed_seconds}s | Device: ${data.stats.device_name}`;
 
             statResolution.textContent = `${imgWidth} x ${imgHeight}`;
             statTotalPixels.textContent = (imgWidth * imgHeight).toLocaleString();
             statTotalSwaps.textContent = '0';
             statSortedPixels.textContent = `0 / ${(imgWidth * imgHeight).toLocaleString()} (0.00%)`;
             statCurrentAlgo.textContent = sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text;
-            statSimState.textContent = '정렬 준비 완료';
+            statSimState.textContent = 'Ready to sort';
 
             initSortingEngine();
 
@@ -495,14 +495,14 @@ btnPrepare.addEventListener('click', async () => {
             btnReset.disabled = false;
             btnDownload.disabled = false;
 
-            logStatus(`🎉 ${data.stats.message || 'GPU 가속 완료!'} 이제 정렬을 시작하세요.`);
+            logStatus(`${data.stats.message || 'GPU optimization complete!'} Click [Start Sorting] to begin.`);
             return;
         } else {
             throw new Error(`Server returned status ${response.status}`);
         }
     } catch (err) {
         console.warn('Backend GPU API failed or offline, falling back to local pipeline:', err);
-        logStatus('서버 GPU API 응답 지연으로 로컬 브라우저 최적화로 폴백합니다...');
+        logStatus('Server GPU API unavailable; falling back to client-side optimization...');
         const { srcImg, targetImg } = await processImagesClientSide(srcFile, tgtFile, fitMode);
         await startHillClimbingOptimization(srcImg, targetImg);
     }
@@ -558,15 +558,15 @@ btnLoadSample.addEventListener('click', async () => {
 
     // Convert canvases to Blob and send to /api/optimize-gpu
     optimizerProgressContainer.style.display = 'block';
-    optStatusTitle.textContent = '내장 샘플 RTX 3080 Ti CUDA GPU 가속 연산 중...';
+    optStatusTitle.textContent = 'Built-in sample: RTX 3080 Ti CUDA computing...';
     optProgressBar.value = 40;
-    optPercentText.textContent = 'GPU 연산 중...';
+    optPercentText.textContent = 'GPU computing...';
 
     const blob1 = await new Promise(res => c1.toBlob(res, 'image/png'));
     const blob2 = await new Promise(res => c2.toBlob(res, 'image/png'));
 
     const optMode = (optMode3D && optMode3D.checked) ? '3d_rgb_vector' : '5d_sliced';
-    const optModeName = optMode === '3d_rgb_vector' ? '3D RGB 벡터 공간 매칭' : '5D 시공간 매칭';
+    const optModeName = optMode === '3d_rgb_vector' ? '3D RGB Vector Matching' : '5D Spatiotemporal Transport';
 
     const formData = new FormData();
     formData.append('source', blob1, 'sample_src.png');
@@ -600,16 +600,16 @@ btnLoadSample.addEventListener('click', async () => {
             destinationMap = new Int32Array(data.destination_map);
 
             optProgressBar.value = 100;
-            optPercentText.textContent = '100% 완료 (GPU 가속)';
-            optStatusTitle.textContent = data.stats.message || 'GPU 가속 중간 이미지 생성 완료!';
-            optDetailText.textContent = `해상도: ${imgWidth}x${imgHeight} | 소요시간: ${data.stats.elapsed_seconds}초 | 디바이스: ${data.stats.device_name}`;
+            optPercentText.textContent = '100% Complete (GPU accelerated)';
+            optStatusTitle.textContent = data.stats.message || 'GPU accelerated Intermediate image complete!';
+            optDetailText.textContent = `Res: ${imgWidth}x${imgHeight} | Elapsed: ${data.stats.elapsed_seconds}s | Device: ${data.stats.device_name}`;
 
             statResolution.textContent = `${imgWidth} x ${imgHeight}`;
             statTotalPixels.textContent = (imgWidth * imgHeight).toLocaleString();
             statTotalSwaps.textContent = '0';
             statSortedPixels.textContent = `0 / ${(imgWidth * imgHeight).toLocaleString()} (0.00%)`;
             statCurrentAlgo.textContent = sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text;
-            statSimState.textContent = '정렬 준비 완료';
+            statSimState.textContent = 'Ready to sort';
 
             initSortingEngine();
 
@@ -620,7 +620,7 @@ btnLoadSample.addEventListener('click', async () => {
             btnReset.disabled = false;
             btnDownload.disabled = false;
 
-            logStatus(`🎉 ${data.stats.message || 'GPU 가속 완료!'} 이제 정렬을 시작하세요.`);
+            logStatus(`${data.stats.message || 'GPU optimization complete!'} Click [Start Sorting] to begin.`);
             return;
         }
     } catch (e) {
@@ -651,11 +651,11 @@ function initSortingEngine() {
     statTotalSwaps.textContent = '0';
     statSortedPixels.textContent = `0 / ${(imgWidth * imgHeight).toLocaleString()} (0.00%)`;
     statCurrentAlgo.textContent = sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text;
-    statSimState.textContent = '대기 중 (시작 대기)';
-    btnPlayPause.textContent = '정렬 시작 (Start)';
+    statSimState.textContent = 'Idle (Ready to start)';
+    btnPlayPause.textContent = 'Start Sorting';
     btnPlayPause.classList.add('primary');
 
-    mainMeta.textContent = `해상도: ${imgWidth}x${imgHeight} | 정렬 대기: ${statCurrentAlgo.textContent}`;
+    mainMeta.textContent = `Res: ${imgWidth}x${imgHeight} | Ready: ${statCurrentAlgo.textContent}`;
     swapAccumulator = 0;
 }
 
@@ -664,7 +664,7 @@ sortAlgoSelect.addEventListener('change', () => {
         const wasSorting = isSorting;
         if (wasSorting) pauseSorting();
         initSortingEngine();
-        logStatus(`정렬 알고리즘이 [${sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text}] 로 변경되었습니다.`);
+        logStatus(`Sorting algorithm changed to [${sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text}] selected.`);
     }
 });
 
@@ -711,7 +711,7 @@ function executeSortingStep() {
         statSwapsPerSec.textContent = `${sps.toLocaleString()} swaps/s`;
         statFps.textContent = `${fps} FPS`;
 
-        mainMeta.textContent = `스왑: ${engine.totalSwaps.toLocaleString()} | 진행도: ${percent}% | 현재: ${swapsDone.toLocaleString()}회/프레임`;
+        mainMeta.textContent = `Swaps: ${engine.totalSwaps.toLocaleString()} | Progress: ${percent}% | Current: ${swapsDone.toLocaleString()} / frame`;
 
         swapsSinceLastMetric = 0;
         framesSinceLastMetric = 0;
@@ -720,10 +720,10 @@ function executeSortingStep() {
 
     if (engine.isDone) {
         pauseSorting();
-        statSimState.textContent = '정렬 완료!';
-        btnPlayPause.textContent = '정렬 완료';
+        statSimState.textContent = 'Complete!';
+        btnPlayPause.textContent = 'Complete';
         btnPlayPause.disabled = true;
-        logStatus('🎉 정렬 완료! 원본 이미지가 정렬 알고리즘을 통해 중간 이미지로 완전히 변환되었습니다.');
+        logStatus('Complete! Source image has been fully transformed into the target mapping.');
     }
 }
 
@@ -749,29 +749,29 @@ function sortingLoop() {
 function startSorting() {
     if (!engine || isSorting || engine.isDone) return;
     isSorting = true;
-    btnPlayPause.textContent = '일시정지 (Pause)';
+    btnPlayPause.textContent = 'Pause Sorting';
     btnPlayPause.classList.remove('primary');
-    statSimState.textContent = '정렬 진행 중...';
+    statSimState.textContent = 'Sorting in progress...';
     lastFrameTime = performance.now();
     lastMetricTime = performance.now();
     swapAccumulator = 0;
     swapsSinceLastMetric = 0;
     framesSinceLastMetric = 0;
-    logStatus(`[${statCurrentAlgo.textContent}] 정렬 시뮬레이션 시작 (목표 속도: ${targetSwapsPerSec.toLocaleString()} swaps/s)...`);
+    logStatus(`[${statCurrentAlgo.textContent}] simulation started (Target speed: ${targetSwapsPerSec.toLocaleString()} swaps/s)...`);
     sortingLoop();
 }
 
 function pauseSorting() {
     if (!isSorting) return;
     isSorting = false;
-    btnPlayPause.textContent = '계속 진행 (Resume)';
+    btnPlayPause.textContent = 'Resume Sorting';
     btnPlayPause.classList.add('primary');
-    statSimState.textContent = '일시정지됨';
+    statSimState.textContent = 'Paused';
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
         animationFrameId = null;
     }
-    logStatus('정렬 시뮬레이션 일시정지됨.');
+    logStatus('Sorting simulation paused.');
 }
 
 btnPlayPause.addEventListener('click', () => {
@@ -785,7 +785,7 @@ btnPlayPause.addEventListener('click', () => {
 btnStep.addEventListener('click', () => {
     if (isSorting) pauseSorting();
     executeSortingStep();
-    logStatus('1스텝 수동 실행 완료.');
+    logStatus('Executed 1 step.');
 });
 
 btnReset.addEventListener('click', () => {
@@ -793,7 +793,7 @@ btnReset.addEventListener('click', () => {
     if (isSorting) pauseSorting();
     initSortingEngine();
     btnPlayPause.disabled = false;
-    logStatus('초기 소스 이미지 상태로 리셋되었습니다.');
+    logStatus('Reset to initial source image.');
 });
 
 btnDownload.addEventListener('click', () => {
@@ -802,7 +802,7 @@ btnDownload.addEventListener('click', () => {
     link.download = `pixelator_sorted_${sortAlgoSelect.value}_${Date.now()}.png`;
     link.href = mainCanvas.toDataURL('image/png');
     link.click();
-    logStatus('현재 캔버스 이미지를 PNG 파일로 저장했습니다.');
+    logStatus('Current canvas saved as PNG.');
 });
 
 // Automatically load default project images (Hamster V -> Rick Astley) on startup

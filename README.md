@@ -32,9 +32,9 @@ A pixel sorting simulator that rearranges pixels from a source image to reproduc
    - Choose the intermediate optimization mode:
      - 5D Spatiotemporal Optimal Transport: Balances spatial contours and color distribution.
      - 3D RGB Vector Matching: Automatically converges to the local minimum in 3D color space.
-   - Click "이미지 불러오기 및 중간 이미지 최적화 계산" to compute the pixel destination map (~0.2-0.5s on GPU).
+   - Click "Prepare & Optimize Intermediate Image" to compute the pixel destination map (~0.2-0.5s on GPU).
 
 2. Sorting Visualization
    - Select a sorting algorithm from the dropdown (e.g., 2D Spatial QuickSort, 2D Spatial MergeSort).
    - Keep the default adaptive speed control (240,000 swaps/s at 75 FPS) or adjust the target rate.
-   - Click "정렬 시작 (Start)" to visualize the step-by-step pixel rearrangement process.
+   - Click "Start Sorting" to visualize the step-by-step pixel rearrangement process.
