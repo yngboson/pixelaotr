@@ -1,0 +1,20 @@
+﻿# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Embedded Python runtime & virtual environments (~250MB)
+python/
+.venv/
+venv/
+env/
+ENV/
+
+# OS and Editor metadata
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
