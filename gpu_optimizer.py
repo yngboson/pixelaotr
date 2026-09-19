@@ -17,7 +17,7 @@ except ImportError:
 
 def optimize_intermediate_gpu(source_pixels_rgb, target_pixels_rgb, width, height, min_steps=100000, is_auto=True, opt_mode='5d_sliced'):
     """
-    Computes optimal destination mapping using RTX 3080 Ti CUDA acceleration.
+    Computes optimal destination mapping using GPU acceleration.
     opt_mode: '5d_sliced' (spatial + color balance) or '3d_rgb_vector' (pure 3D color nearest matching).
     """
     start_time = time.time()
@@ -115,7 +115,7 @@ def optimize_intermediate_gpu(source_pixels_rgb, target_pixels_rgb, width, heigh
             if n_imp < 10:  # Local minimum reached (less than 0.015% improvable pairs remaining)
                 break
 
-        completion_msg = f"RTX 3080 Ti CUDA GPU: 3D RGB local minimum converged ({actual_projections} projections + {actual_batches} 2-Opt batches, {time.time()-start_time:.2f}s)"
+        completion_msg = f"GPU: 3D RGB local minimum converged ({actual_projections} projections + {actual_batches} 2-Opt batches, {time.time()-start_time:.2f}s)"
     else:
         # 5D sliced mode with simulated annealing schedule
         if is_auto:
@@ -175,7 +175,7 @@ def optimize_intermediate_gpu(source_pixels_rgb, target_pixels_rgb, width, heigh
                 current_indices[sub_a] = idx_val_b
                 current_indices[sub_b] = idx_val_a
 
-        completion_msg = f"RTX 3080 Ti CUDA GPU: 5D spatiotemporal optimization complete with {actual_min_steps:,} steps ({time.time()-start_time:.2f}s)"
+        completion_msg = f"GPU: 5D spatiotemporal optimization complete with {actual_min_steps:,} steps ({time.time()-start_time:.2f}s)"
 
     # 4. Final Color Distance Calculation
     diff = current_src_rgb - tgt_rgb

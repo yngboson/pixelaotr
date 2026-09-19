@@ -31,6 +31,7 @@ const btnPlayPause = document.getElementById('btnPlayPause');
 const btnStep = document.getElementById('btnStep');
 const btnReset = document.getElementById('btnReset');
 const btnDownload = document.getElementById('btnDownload');
+const btnExportGif = document.getElementById('btnExportGif');
 
 const speedSlider = document.getElementById('speedSlider');
 const speedValue = document.getElementById('speedValue');
@@ -357,6 +358,7 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
     btnStep.disabled = true;
     btnReset.disabled = true;
     btnDownload.disabled = true;
+    btnExportGif.disabled = true;
 
     isOptimizing = true;
     logStatus(`Phase 1: Starting optimization (min steps: ${optimizer.minSteps.toLocaleString()})...`);
@@ -398,6 +400,7 @@ async function startHillClimbingOptimization(srcImg, tgtImg) {
             btnStep.disabled = false;
             btnReset.disabled = false;
             btnDownload.disabled = false;
+            btnExportGif.disabled = false;
 
             statSimState.textContent = 'Ready to sort';
             logStatus(`Intermediate image complete! Select an algorithm and click [Start Sorting].`);
@@ -427,10 +430,10 @@ btnPrepare.addEventListener('click', async () => {
     const optModeName = optMode === '3d_rgb_vector' ? '3D RGB Vector Matching' : '5D Spatiotemporal Transport';
 
     optimizerProgressContainer.style.display = 'block';
-    optStatusTitle.textContent = `RTX 3080 Ti CUDA GPU [${optModeName}] computing...`;
+    optStatusTitle.textContent = `GPU [${optModeName}] computing...`;
     optProgressBar.value = 30;
     optPercentText.textContent = 'GPU computing...';
-    optDetailText.textContent = `Performing ultrafast [${optModeName}] optimization via PyTorch CUDA.`;
+    optDetailText.textContent = `Computing [${optModeName}] optimization via GPU.`;
 
     btnPrepare.disabled = true;
     btnResetDefault.disabled = true;
@@ -439,8 +442,9 @@ btnPrepare.addEventListener('click', async () => {
     btnStep.disabled = true;
     btnReset.disabled = true;
     btnDownload.disabled = true;
+    btnExportGif.disabled = true;
 
-    logStatus(`Uploading images to server; starting RTX 3080 Ti CUDA GPU [${optModeName}] optimization...`);
+    logStatus(`Uploading images to server; starting GPU [${optModeName}] optimization...`);
 
     const formData = new FormData();
     formData.append('source', srcFile);
@@ -494,6 +498,7 @@ btnPrepare.addEventListener('click', async () => {
             btnStep.disabled = false;
             btnReset.disabled = false;
             btnDownload.disabled = false;
+            btnExportGif.disabled = false;
 
             logStatus(`${data.stats.message || 'GPU optimization complete!'} Click [Start Sorting] to begin.`);
             return;
@@ -558,7 +563,7 @@ btnLoadSample.addEventListener('click', async () => {
 
     // Convert canvases to Blob and send to /api/optimize-gpu
     optimizerProgressContainer.style.display = 'block';
-    optStatusTitle.textContent = 'Built-in sample: RTX 3080 Ti CUDA computing...';
+    optStatusTitle.textContent = 'Built-in sample: GPU computing...';
     optProgressBar.value = 40;
     optPercentText.textContent = 'GPU computing...';
 
@@ -619,6 +624,7 @@ btnLoadSample.addEventListener('click', async () => {
             btnStep.disabled = false;
             btnReset.disabled = false;
             btnDownload.disabled = false;
+            btnExportGif.disabled = false;
 
             logStatus(`${data.stats.message || 'GPU optimization complete!'} Click [Start Sorting] to begin.`);
             return;
@@ -654,6 +660,7 @@ function initSortingEngine() {
     statSimState.textContent = 'Idle (Ready to start)';
     btnPlayPause.textContent = 'Start Sorting';
     btnPlayPause.classList.add('primary');
+    btnExportGif.disabled = false;
 
     mainMeta.textContent = `Res: ${imgWidth}x${imgHeight} | Ready: ${statCurrentAlgo.textContent}`;
     swapAccumulator = 0;
@@ -805,7 +812,117 @@ btnDownload.addEventListener('click', () => {
     logStatus('Current canvas saved as PNG.');
 });
 
-// Automatically load default project images (Hamster V -> Rick Astley) on startup
+// 7-second GIF Export (70 frames @ 10 fps = exactly 7.0s)
+btnExportGif.addEventListener('click', async () => {
+    if (!destinationMap || !sourcePixelsOriginal || imgWidth === 0 || imgHeight === 0) {
+        alert('Please compute the intermediate optimization mapping first.');
+        return;
+    }
+
+    const wasSorting = isSorting;
+    if (wasSorting) pauseSorting();
+
+    const originalBtnText = btnExportGif.textContent;
+    btnExportGif.disabled = true;
+    btnExportGif.textContent = 'Recording 7s GIF...';
+
+    const selectedAlgo = sortAlgoSelect.value;
+    logStatus(`Preparing 7-second GIF for [${sortAlgoSelect.options[sortAlgoSelect.selectedIndex].text}]...`);
+
+    try {
+        const numFrames = 70;
+        const durationMs = 100; // 70 * 100ms = 7000ms = 7.0 seconds
+
+        // 1. Measure total swaps by running a fast simulation pass in memory
+        const measureEngine = new SortingEngine(imgWidth, imgHeight, sourcePixelsOriginal, destinationMap, selectedAlgo);
+        while (!measureEngine.isDone) {
+            measureEngine.step(250000);
+        }
+        const totalSwapsToComplete = Math.max(1, measureEngine.totalSwaps);
+
+        // 2. Setup thumbnail canvas (fixed width 400px, preserving aspect ratio)
+        const thumbWidth = 400;
+        const thumbHeight = Math.max(1, Math.round((thumbWidth * imgHeight) / imgWidth));
+
+        const fullCanvas = document.createElement('canvas');
+        fullCanvas.width = imgWidth;
+        fullCanvas.height = imgHeight;
+        const fullCtx = fullCanvas.getContext('2d');
+        const fullImgData = fullCtx.createImageData(imgWidth, imgHeight);
+        const fullData32 = new Uint32Array(fullImgData.data.buffer);
+
+        const thumbCanvas = document.createElement('canvas');
+        thumbCanvas.width = thumbWidth;
+        thumbCanvas.height = thumbHeight;
+        const thumbCtx = thumbCanvas.getContext('2d');
+        thumbCtx.imageSmoothingEnabled = true;
+        thumbCtx.imageSmoothingQuality = 'high';
+
+        // 3. New engine instance for recording 70 snapshots
+        const recordEngine = new SortingEngine(imgWidth, imgHeight, sourcePixelsOriginal, destinationMap, selectedAlgo);
+        const frames = [];
+
+        let currentSwaps = 0;
+        for (let k = 0; k < numFrames; k++) {
+            const targetSwaps = Math.round((k * totalSwapsToComplete) / (numFrames - 1));
+            const delta = targetSwaps - currentSwaps;
+            if (delta > 0 && !recordEngine.isDone) {
+                recordEngine.step(delta);
+                currentSwaps = recordEngine.totalSwaps;
+            }
+
+            fullData32.set(recordEngine.currentPixels);
+            fullCtx.putImageData(fullImgData, 0, 0);
+
+            thumbCtx.drawImage(fullCanvas, 0, 0, thumbWidth, thumbHeight);
+            frames.push(thumbCanvas.toDataURL('image/jpeg', 0.85));
+
+            if ((k + 1) % 10 === 0 || k === numFrames - 1) {
+                btnExportGif.textContent = `Capturing (${k + 1}/${numFrames})...`;
+                logStatus(`Capturing GIF frames: ${k + 1} / ${numFrames} (7.0s timeline)...`);
+                await new Promise(r => setTimeout(r, 0));
+            }
+        }
+
+        btnExportGif.textContent = 'Encoding GIF...';
+        logStatus('Encoding 7.0-second GIF on server...');
+
+        // 4. Send to /api/export-gif
+        const response = await fetch('/api/export-gif', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                frames: frames,
+                duration: durationMs,
+                algo: selectedAlgo
+            })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || `Server returned HTTP ${response.status}`);
+        }
+
+        const blob = await response.blob();
+        const downloadUrl = URL.createObjectURL(blob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        downloadLink.download = `pixelator_${selectedAlgo}_7s.gif`;
+        downloadLink.click();
+        URL.revokeObjectURL(downloadUrl);
+
+        logStatus(`7-second GIF exported successfully (${(blob.size / 1024).toFixed(1)} KB)!`);
+    } catch (err) {
+        console.error('GIF export error:', err);
+        alert('Failed to export GIF: ' + err.message);
+        logStatus('GIF export failed: ' + err.message);
+    } finally {
+        btnExportGif.disabled = false;
+        btnExportGif.textContent = originalBtnText;
+    }
+});
+
+// Automatically load default project images on startup
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', loadDefaultProjectImages);
 } else {

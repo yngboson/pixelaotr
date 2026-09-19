@@ -1,4 +1,4 @@
-﻿# Pixelator
+# Pixelator
 
 A pixel sorting simulator that rearranges pixels from a source image to reproduce a target image using sorting algorithms under strict pixel conservation (permutations only).
 
@@ -38,3 +38,4 @@ A pixel sorting simulator that rearranges pixels from a source image to reproduc
    - Select a sorting algorithm from the dropdown (e.g., 2D Spatial QuickSort, 2D Spatial MergeSort).
    - Keep the default adaptive speed control (240,000 swaps/s at 75 FPS) or adjust the target rate.
    - Click "Start Sorting" to visualize the step-by-step pixel rearrangement process.
+   - Click "Export 7s GIF" to render and download a 7.0-second animated GIF showing the entire sorting transformation.

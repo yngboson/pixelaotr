@@ -3,7 +3,7 @@ import io
 import base64
 import numpy as np
 from PIL import Image
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, send_file
 
 # Try importing cv2 for AI Super-Resolution
 try:
@@ -237,6 +237,51 @@ def optimize_gpu():
         import traceback
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/export-gif', methods=['POST'])
+def export_gif():
+    try:
+        data = request.get_json(force=True)
+        frames_base64 = data.get('frames', [])
+        duration = int(data.get('duration', 100))  # 100ms * 70 frames = 7000ms = 7.0s
+        algo = data.get('algo', 'sort')
+
+        if not frames_base64 or len(frames_base64) < 2:
+            return jsonify({'error': 'At least 2 frames required.'}), 400
+
+        pil_frames = []
+        for item in frames_base64:
+            if ',' in item:
+                item = item.split(',', 1)[1]
+            img_bytes = base64.b64decode(item)
+            frame_img = Image.open(io.BytesIO(img_bytes)).convert('RGB')
+            # Adaptive 256-color palette quantization for small size and high quality
+            p_frame = frame_img.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.FLOYDSTEINBERG)
+            pil_frames.append(p_frame)
+
+        output_io = io.BytesIO()
+        pil_frames[0].save(
+            output_io,
+            format='GIF',
+            save_all=True,
+            append_images=pil_frames[1:],
+            duration=duration,
+            loop=0,
+            optimize=True
+        )
+        output_io.seek(0)
+
+        filename = f'pixelator_{algo}_7s.gif'
+        return send_file(
+            output_io,
+            mimetype='image/gif',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to generate GIF: {str(e)}'}), 500
 
 @app.route('/api/status', methods=['GET'])
 def get_status():
