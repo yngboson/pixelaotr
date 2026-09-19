@@ -255,19 +255,19 @@ def export_gif():
                 item = item.split(',', 1)[1]
             img_bytes = base64.b64decode(item)
             frame_img = Image.open(io.BytesIO(img_bytes)).convert('RGB')
-            # Adaptive 256-color palette quantization for small size and high quality
-            p_frame = frame_img.quantize(colors=256, method=Image.MEDIANCUT, dither=Image.FLOYDSTEINBERG)
-            pil_frames.append(p_frame)
+            pil_frames.append(frame_img)
 
         output_io = io.BytesIO()
+        durations = [duration] * len(pil_frames)
         pil_frames[0].save(
             output_io,
             format='GIF',
             save_all=True,
             append_images=pil_frames[1:],
-            duration=duration,
+            duration=durations,
             loop=0,
-            optimize=True
+            disposal=2,
+            optimize=False
         )
         output_io.seek(0)
 

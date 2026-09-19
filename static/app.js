@@ -834,11 +834,15 @@ btnExportGif.addEventListener('click', async () => {
         const durationMs = 100; // 70 * 100ms = 7000ms = 7.0 seconds
 
         // 1. Measure total swaps by running a fast simulation pass in memory
+        let totalSwapsToComplete = 0;
         const measureEngine = new SortingEngine(imgWidth, imgHeight, sourcePixelsOriginal, destinationMap, selectedAlgo);
         while (!measureEngine.isDone) {
-            measureEngine.step(250000);
+            const count = measureEngine.step(100000);
+            totalSwapsToComplete += count;
+            if (count === 0) break;
         }
-        const totalSwapsToComplete = Math.max(1, measureEngine.totalSwaps);
+        totalSwapsToComplete = Math.max(1, totalSwapsToComplete);
+        console.log(`[GIF Export] Total swaps to complete: ${totalSwapsToComplete.toLocaleString()}`);
 
         // 2. Setup thumbnail canvas (fixed width 400px, preserving aspect ratio)
         const thumbWidth = 400;
@@ -862,13 +866,21 @@ btnExportGif.addEventListener('click', async () => {
         const recordEngine = new SortingEngine(imgWidth, imgHeight, sourcePixelsOriginal, destinationMap, selectedAlgo);
         const frames = [];
 
-        let currentSwaps = 0;
         for (let k = 0; k < numFrames; k++) {
-            const targetSwaps = Math.round((k * totalSwapsToComplete) / (numFrames - 1));
-            const delta = targetSwaps - currentSwaps;
-            if (delta > 0 && !recordEngine.isDone) {
-                recordEngine.step(delta);
-                currentSwaps = recordEngine.totalSwaps;
+            if (k === 0) {
+                // First frame: initial source image (0 swaps)
+            } else if (k === numFrames - 1) {
+                // Final frame: run until complete
+                while (!recordEngine.isDone) {
+                    const stepDone = recordEngine.step(100000);
+                    if (stepDone === 0) break;
+                }
+            } else {
+                const targetSwaps = Math.round((k * totalSwapsToComplete) / (numFrames - 1));
+                const delta = targetSwaps - recordEngine.totalSwaps;
+                if (delta > 0 && !recordEngine.isDone) {
+                    recordEngine.step(delta);
+                }
             }
 
             fullData32.set(recordEngine.currentPixels);

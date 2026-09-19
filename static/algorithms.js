@@ -208,6 +208,8 @@ class SortingEngine {
             if (this.keys[i] === i) this.sortedPixelsCount++;
         }
 
+        this.totalSwaps = 0;
+        this.isDone = false;
         this.generator = this.createSortGenerator();
     }
 
